@@ -21,7 +21,7 @@ public class NettyClient {
     public static void main(String[] args) {
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
 
-        Bootstrap bootstrap = new Bootstrap();
+        Bootstrap bootstrap = new Bootstrap();//客户端启动的引导类是 Bootstrap，负责启动客户端以及连接服务端
         bootstrap
                 // 1.指定线程模型
                 .group(workerGroup)
@@ -41,7 +41,7 @@ public class NettyClient {
                 });
 
         // 4.建立连接
-        connect(bootstrap, "juejin.im", 80, MAX_RETRY);
+        connect(bootstrap, "localhost", 9100, MAX_RETRY);
     }
 
     private static void connect(Bootstrap bootstrap, String host, int port, int retry) {
@@ -56,8 +56,11 @@ public class NettyClient {
                 // 本次重连的间隔
                 int delay = 1 << order;
                 System.err.println(new Date() + ": 连接失败，第" + order + "次重连……");
-                bootstrap.config().group().schedule(() -> connect(bootstrap, host, port, retry - 1), delay, TimeUnit
-                        .SECONDS);
+                //延时任务
+                bootstrap.config().group().schedule(
+                        () -> connect(bootstrap, host, port, retry - 1),
+                        delay,
+                        TimeUnit.SECONDS);
             }
         });
     }
